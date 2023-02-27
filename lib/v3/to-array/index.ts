@@ -1,6 +1,4 @@
-module.exports = toArray
-
-function toArray(list, index) {
+export default function toArray(list, index=0) {
     var array = []
 
     index = index || 0

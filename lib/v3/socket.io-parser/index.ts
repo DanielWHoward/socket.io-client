@@ -3,11 +3,12 @@
  * Module dependencies.
  */
 
-var debug = require('debug')('socket.io-parser');
-var Emitter = require('component-emitter');
-var binary = require('./binary');
-var isArray = require('isarray');
-var isBuf = require('./is-buffer');
+import debugModule from 'debug';
+var debug = debugModule('socket.io-parser');
+import Emitter from '../component-emitter';
+import binary from './binary';
+import isArray from '../isarray';
+import isBuf from './is-buffer';
 
 /**
  * Protocol version.
@@ -15,7 +16,7 @@ var isBuf = require('./is-buffer');
  * @api public
  */
 
-exports.protocol = 4;
+const protocol = 4;
 
 /**
  * Packet types.
@@ -23,7 +24,7 @@ exports.protocol = 4;
  * @api public
  */
 
-exports.types = [
+const types = [
   'CONNECT',
   'DISCONNECT',
   'EVENT',
@@ -39,7 +40,7 @@ exports.types = [
  * @api public
  */
 
-exports.CONNECT = 0;
+const CONNECT = 0;
 
 /**
  * Packet type `disconnect`.
@@ -47,7 +48,7 @@ exports.CONNECT = 0;
  * @api public
  */
 
-exports.DISCONNECT = 1;
+const DISCONNECT = 1;
 
 /**
  * Packet type `event`.
@@ -55,7 +56,7 @@ exports.DISCONNECT = 1;
  * @api public
  */
 
-exports.EVENT = 2;
+const EVENT = 2;
 
 /**
  * Packet type `ack`.
@@ -63,7 +64,7 @@ exports.EVENT = 2;
  * @api public
  */
 
-exports.ACK = 3;
+const ACK = 3;
 
 /**
  * Packet type `error`.
@@ -71,7 +72,7 @@ exports.ACK = 3;
  * @api public
  */
 
-exports.ERROR = 4;
+const ERROR = 4;
 
 /**
  * Packet type 'binary event'
@@ -79,7 +80,7 @@ exports.ERROR = 4;
  * @api public
  */
 
-exports.BINARY_EVENT = 5;
+const BINARY_EVENT = 5;
 
 /**
  * Packet type `binary ack`. For acks with binary arguments.
@@ -87,23 +88,7 @@ exports.BINARY_EVENT = 5;
  * @api public
  */
 
-exports.BINARY_ACK = 6;
-
-/**
- * Encoder constructor.
- *
- * @api public
- */
-
-exports.Encoder = Encoder;
-
-/**
- * Decoder constructor.
- *
- * @api public
- */
-
-exports.Decoder = Decoder;
+const BINARY_ACK = 6;
 
 /**
  * A socket.io Encoder instance
@@ -113,7 +98,7 @@ exports.Decoder = Decoder;
 
 function Encoder() {}
 
-var ERROR_PACKET = exports.ERROR + '"encode error"';
+const ERROR_PACKET = ERROR + '"encode error"';
 
 /**
  * Encode a packet as a single string if non-binary, or as a
@@ -128,7 +113,7 @@ var ERROR_PACKET = exports.ERROR + '"encode error"';
 Encoder.prototype.encode = function(obj, callback){
   debug('encoding packet %j', obj);
 
-  if (exports.BINARY_EVENT === obj.type || exports.BINARY_ACK === obj.type) {
+  if (BINARY_EVENT === obj.type || BINARY_ACK === obj.type) {
     encodeAsBinary(obj, callback);
   } else {
     var encoding = encodeAsString(obj);
@@ -150,7 +135,7 @@ function encodeAsString(obj) {
   var str = '' + obj.type;
 
   // attachments if we have them
-  if (exports.BINARY_EVENT === obj.type || exports.BINARY_ACK === obj.type) {
+  if (BINARY_EVENT === obj.type || BINARY_ACK === obj.type) {
     str += obj.attachments + '-';
   }
 
@@ -240,7 +225,7 @@ Decoder.prototype.add = function(obj) {
   var packet;
   if (typeof obj === 'string') {
     packet = decodeString(obj);
-    if (exports.BINARY_EVENT === packet.type || exports.BINARY_ACK === packet.type) { // binary packet's json
+    if (BINARY_EVENT === packet.type || BINARY_ACK === packet.type) { // binary packet's json
       this.reconstructor = new BinaryReconstructor(packet);
 
       // no attachments, labeled binary but no binary data to follow
@@ -276,22 +261,22 @@ Decoder.prototype.add = function(obj) {
 function decodeString(str) {
   var i = 0;
   // look up type
-  var p = {
+  var p: { type: number; nsp?: string; attachments?: number; id?: string|number; data?: any; } = {
     type: Number(str.charAt(0))
   };
 
-  if (null == exports.types[p.type]) {
+  if (null == types[p.type]) {
     return error('unknown packet type ' + p.type);
   }
 
   // look up attachments if type binary
-  if (exports.BINARY_EVENT === p.type || exports.BINARY_ACK === p.type) {
+  if (BINARY_EVENT === p.type || BINARY_ACK === p.type) {
     var buf = '';
     while (str.charAt(++i) !== '-') {
       buf += str.charAt(i);
       if (i == str.length) break;
     }
-    if (buf != Number(buf) || str.charAt(i) !== '-') {
+    if (buf != Number(buf).toString() || str.charAt(i) !== '-') {
       throw new Error('Illegal attachments');
     }
     p.attachments = Number(buf);
@@ -329,7 +314,7 @@ function decodeString(str) {
   // look up json data
   if (str.charAt(++i)) {
     var payload = tryParse(str.substr(i));
-    var isPayloadValid = payload !== false && (p.type === exports.ERROR || isArray(payload));
+    var isPayloadValid = payload !== false && (p.type === ERROR || isArray(payload));
     if (isPayloadValid) {
       p.data = payload;
     } else {
@@ -409,7 +394,21 @@ BinaryReconstructor.prototype.finishedReconstruction = function() {
 
 function error(msg) {
   return {
-    type: exports.ERROR,
+    type: ERROR,
     data: 'parser error: ' + msg
   };
 }
+
+export default {
+  protocol,
+  types,
+  CONNECT,
+  DISCONNECT,
+  EVENT,
+  ACK,
+  ERROR,
+  BINARY_EVENT,
+  BINARY_ACK,
+  Encoder,
+  Decoder,
+};

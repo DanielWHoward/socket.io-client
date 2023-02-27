@@ -4,11 +4,11 @@
  * Module requirements
  */
 
-var isArray = require('isarray');
-var isBuf = require('./is-buffer');
-var toString = Object.prototype.toString;
-var withNativeBlob = typeof Blob === 'function' || (typeof Blob !== 'undefined' && toString.call(Blob) === '[object BlobConstructor]');
-var withNativeFile = typeof File === 'function' || (typeof File !== 'undefined' && toString.call(File) === '[object FileConstructor]');
+import isArray from '../isarray';
+import isBuf from './is-buffer';
+var toStringFunc = Object.prototype.toString;
+var withNativeBlob = typeof Blob === 'function' || (typeof Blob !== 'undefined' && toStringFunc.call(Blob) === '[object BlobConstructor]');
+var withNativeFile = typeof File === 'function' || (typeof File !== 'undefined' && toStringFunc.call(File) === '[object FileConstructor]');
 
 /**
  * Replaces every Buffer | ArrayBuffer in packet with a numbered placeholder.
@@ -20,7 +20,7 @@ var withNativeFile = typeof File === 'function' || (typeof File !== 'undefined' 
  * @api public
  */
 
-exports.deconstructPacket = function(packet) {
+const deconstructPacket = function(packet) {
   var buffers = [];
   var packetData = packet.data;
   var pack = packet;
@@ -43,11 +43,11 @@ function _deconstructPacket(data, buffers) {
     }
     return newData;
   } else if (typeof data === 'object' && !(data instanceof Date)) {
-    var newData = {};
+    var newData2 = {};
     for (var key in data) {
-      newData[key] = _deconstructPacket(data[key], buffers);
+      newData2[key] = _deconstructPacket(data[key], buffers);
     }
-    return newData;
+    return newData2;
   }
   return data;
 }
@@ -61,7 +61,7 @@ function _deconstructPacket(data, buffers) {
  * @api public
  */
 
-exports.reconstructPacket = function(packet, buffers) {
+const reconstructPacket = function(packet, buffers) {
   packet.data = _reconstructPacket(packet.data, buffers);
   packet.attachments = undefined; // no longer useful
   return packet;
@@ -95,8 +95,8 @@ function _reconstructPacket(data, buffers) {
  * @api private
  */
 
-exports.removeBlobs = function(data, callback) {
-  function _removeBlobs(obj, curKey, containingObject) {
+const removeBlobs = function(data, callback) {
+  function _removeBlobs(obj, curKey=undefined, containingObject=undefined) {
     if (!obj) return obj;
 
     // convert any blob
@@ -138,4 +138,10 @@ exports.removeBlobs = function(data, callback) {
   if (!pendingBlobs) {
     callback(bloblessData);
   }
+};
+
+export default {
+  deconstructPacket,
+  reconstructPacket,
+  removeBlobs,
 };

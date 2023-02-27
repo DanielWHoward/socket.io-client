@@ -34,10 +34,15 @@
   "dependencies": {
     "@socket.io/component-emitter": "~3.0.0",
     "backo2": "~1.0.2",
+    "component-bind": "1.0.0",
     "debug": "~4.3.2",
-    "engine.io-client": "~6.1.1",
+    "engine.io-client": "DanielWHoward/engine.io-client#v3-v4-plus",
+    "has-binary2": "~1.0.2",
+    "indexof": "0.0.1",
+    "parseqs": "0.0.5",
     "parseuri": "0.0.6",
-    "socket.io-parser": "~4.1.1"
+    "socket.io-parser": "~4.1.1",
+    "to-array": "0.1.4"
   },
   "devDependencies": {
     "@babel/core": "^7.15.0",

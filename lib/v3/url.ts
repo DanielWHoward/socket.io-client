@@ -3,14 +3,13 @@
  * Module dependencies.
  */
 
-var parseuri = require('parseuri');
-var debug = require('debug')('socket.io-client:url');
+import parseuri from 'parseuri';
+import debugModule from 'debug';
+var debug = debugModule('socket.io-client:url');
 
 /**
  * Module exports.
  */
-
-module.exports = url;
 
 /**
  * URL parser.
@@ -73,3 +72,7 @@ function url (uri, loc) {
 
   return obj;
 }
+
+export {
+  url as default,
+};

@@ -1,3 +1,4 @@
+//import { parse } from "engine.io-client";
 import parseuri from "parseuri";
 import debugModule from "debug"; // debug()
 
@@ -68,6 +69,7 @@ export function url(
 
     // parse
     debug("parse %s", uri);
+    //obj = parse(uri) as ParsedUrl;
     obj = parseuri(uri) as ParsedUrl;
   }
 

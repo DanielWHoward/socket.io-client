@@ -1,4 +1,3 @@
-
 /**
  * Initialize backoff timer with `opts`.
  *
@@ -11,7 +10,7 @@
  * @api public
  */
 
-export default function Backoff(opts) {
+export function Backoff(opts) {
   opts = opts || {};
   this.ms = opts.min || 100;
   this.max = opts.max || 10000;
@@ -76,3 +75,4 @@ Backoff.prototype.setMax = function(max){
 Backoff.prototype.setJitter = function(jitter){
   this.jitter = jitter;
 };
+

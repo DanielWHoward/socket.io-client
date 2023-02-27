@@ -3,22 +3,21 @@
  * Module dependencies.
  */
 
-var url = require('./url');
-var parser = require('socket.io-parser');
-var Manager = require('./manager');
-var debug = require('debug')('socket.io-client');
+import url from './url';
+import parser from './socket.io-parser';
+import Manager from './manager';
+import debugModule from 'debug';
+var debug = debugModule('socket.io-client');
 
 /**
  * Module exports.
  */
 
-module.exports = exports = lookup;
-
 /**
  * Managers cache.
  */
 
-var cache = exports.managers = {};
+var cache = {};
 
 /**
  * Looks up an existing `Manager` for multiplexing.
@@ -41,7 +40,7 @@ function lookup (uri, opts) {
 
   opts = opts || {};
 
-  var parsed = url(uri);
+  var parsed = url(uri, null);
   var source = parsed.source;
   var id = parsed.id;
   var path = parsed.path;
@@ -53,11 +52,11 @@ function lookup (uri, opts) {
 
   if (newConnection) {
     debug('ignoring socket cache for %s', source);
-    io = Manager(source, opts);
+    io = new Manager(source, opts);
   } else {
     if (!cache[id]) {
       debug('new io instance for %s', source);
-      cache[id] = Manager(source, opts);
+      cache[id] = new Manager(source, opts);
     }
     io = cache[id];
   }
@@ -73,7 +72,7 @@ function lookup (uri, opts) {
  * @api public
  */
 
-exports.protocol = parser.protocol;
+var protocol = parser.protocol;
 
 /**
  * `connect`.
@@ -82,7 +81,7 @@ exports.protocol = parser.protocol;
  * @api public
  */
 
-exports.connect = lookup;
+const connect = lookup;
 
 /**
  * Expose constructors for standalone build.
@@ -90,5 +89,19 @@ exports.connect = lookup;
  * @api public
  */
 
-exports.Manager = require('./manager');
-exports.Socket = require('./socket');
+import { v3 as eio } from 'engine.io-client';
+import Socket from './socket';
+
+const v4 = {
+  eio,
+  name: 'socket.io-client',
+  managers: cache,
+  protocol,
+  Manager,
+  Socket,
+  io: lookup,
+  connect: lookup,
+  default: lookup,
+}
+
+export { v4 };

@@ -3,15 +3,17 @@
  * Module dependencies.
  */
 
-var eio = require('engine.io-client');
-var Socket = require('./socket');
-var Emitter = require('component-emitter');
-var parser = require('socket.io-parser');
-var on = require('./on');
-var bind = require('component-bind');
-var debug = require('debug')('socket.io-client:manager');
-var indexOf = require('indexof');
-var Backoff = require('backo2');
+import { v3 } from 'engine.io-client';
+var eio = v3.Socket;
+import Socket from './socket';
+import Emitter from './component-emitter';
+import parser from './socket.io-parser';
+import on from './on';
+import bind from './component-bind';
+import debugModule from 'debug';
+var debug = debugModule('socket.io-client:manager');
+import indexOf from './indexof';
+import Backoff from './backo2';
 
 /**
  * IE6+ hasOwnProperty
@@ -23,8 +25,6 @@ var has = Object.prototype.hasOwnProperty;
  * Module exports
  */
 
-module.exports = Manager;
-
 /**
  * `Manager` constructor.
  *
@@ -34,7 +34,8 @@ module.exports = Manager;
  */
 
 function Manager (uri, opts) {
-  if (!(this instanceof Manager)) return new Manager(uri, opts);
+//  if (!(this instanceof Manager)) return new Manager(uri, opts);
+  if (!(this instanceof Manager)) console.error('socket.io-client:Is not a Manager');
   if (uri && ('object' === typeof uri)) {
     opts = uri;
     uri = undefined;
@@ -223,7 +224,7 @@ Manager.prototype.connect = function (fn, opts) {
   if (~this.readyState.indexOf('open')) return this;
 
   debug('opening %s', this.uri);
-  this.engine = eio(this.uri, this.opts);
+  this.engine = new eio(this.uri, this.opts);
   var socket = this.engine;
   var self = this;
   this.readyState = 'opening';
@@ -242,7 +243,7 @@ Manager.prototype.connect = function (fn, opts) {
     self.readyState = 'closed';
     self.emitAll('connect_error', data);
     if (fn) {
-      var err = new Error('Connection error');
+      var err: any = new Error('Connection error');
       err.data = data;
       fn(err);
     } else {
@@ -322,7 +323,8 @@ Manager.prototype.onping = function () {
  */
 
 Manager.prototype.onpong = function () {
-  this.emitAll('pong', new Date() - this.lastPing);
+  var now: any = new Date();
+  this.emitAll('pong', now - this.lastPing);
 };
 
 /**
@@ -570,4 +572,8 @@ Manager.prototype.onreconnect = function () {
   this.backoff.reset();
   this.updateSocketIds();
   this.emitAll('reconnect', attempt);
+};
+
+export {
+  Manager as default,
 };

@@ -3,8 +3,6 @@
  * Module exports.
  */
 
-module.exports = on;
-
 /**
  * Helper for subscriptions.
  *
@@ -14,7 +12,7 @@ module.exports = on;
  * @api public
  */
 
-function on (obj, ev, fn) {
+function on (obj, ev, fn): {destroy: any;} {
   obj.on(ev, fn);
   return {
     destroy: function () {
@@ -22,3 +20,7 @@ function on (obj, ev, fn) {
     }
   };
 }
+
+export {
+  on as default,
+};

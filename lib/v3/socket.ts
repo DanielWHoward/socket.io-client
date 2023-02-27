@@ -3,20 +3,19 @@
  * Module dependencies.
  */
 
-var parser = require('socket.io-parser');
-var Emitter = require('component-emitter');
-var toArray = require('to-array');
-var on = require('./on');
-var bind = require('component-bind');
-var debug = require('debug')('socket.io-client:socket');
-var parseqs = require('parseqs');
-var hasBin = require('has-binary2');
+import parser from './socket.io-parser';
+import Emitter from './component-emitter';
+import toArray from './to-array';
+import on from './on';
+import bind from './component-bind';
+import debugModule from 'debug';
+var debug = debugModule('socket.io-client:socket');
+import parseqs from 'parseqs';
+import hasBin from './has-binary2';
 
 /**
  * Module exports.
  */
-
-module.exports = exports = Socket;
 
 /**
  * Internal events (blacklisted).
@@ -140,7 +139,7 @@ Socket.prototype.emit = function (ev) {
   }
 
   var args = toArray(arguments);
-  var packet = {
+  var packet: any = {
     type: (this.flags.binary !== undefined ? this.flags.binary : hasBin(args)) ? parser.BINARY_EVENT : parser.EVENT,
     data: args
   };
@@ -435,4 +434,8 @@ Socket.prototype.compress = function (compress) {
 Socket.prototype.binary = function (binary) {
   this.flags.binary = binary;
   return this;
+};
+
+export {
+  Socket as default,
 };

@@ -2,12 +2,13 @@ import {
   Socket as Engine,
   SocketOptions as EngineOptions,
   installTimerFunctions,
+// nextTick,
 } from "engine.io-client";
-import { Socket, SocketOptions } from "./socket.js";
+import { Socket, SocketOptions, DisconnectDescription } from "./socket.js";
 import * as parser from "socket.io-parser";
 import { Decoder, Encoder, Packet } from "socket.io-parser";
 import { on } from "./on.js";
-import Backoff from "backo2";
+import { Backoff } from "./contrib/backo2.js";
 import {
   DefaultEventsMap,
   EventsMap,
@@ -36,6 +37,10 @@ export interface ManagerOptions extends EngineOptions {
    * @default '/socket.io'
    */
   path: string;
+
+  query: {};
+
+  autoUnref: any;
 
   /**
    * Should we allow reconnections?
@@ -90,7 +95,7 @@ interface ManagerReservedEvents {
   error: (err: Error) => void;
   ping: () => void;
   packet: (packet: Packet) => void;
-  close: (reason: string) => void;
+  close: (reason: string, description?: DisconnectDescription) => void;
   reconnect_failed: () => void;
   reconnect_attempt: (attempt: number) => void;
   reconnect_error: (err: Error) => void;
@@ -125,6 +130,7 @@ export class Manager<
 
   private nsps: Record<string, Socket> = {};
   private subs: Array<ReturnType<typeof on>> = [];
+  // @ts-ignore
   private backoff: Backoff;
   private setTimeoutFn: typeof setTimeout;
   private _reconnection: boolean;
@@ -423,7 +429,11 @@ export class Manager<
    * @private
    */
   private ondata(data): void {
-    this.decoder.add(data);
+    try {
+      this.decoder.add(data);
+    } catch (e) {
+      this.onclose("parse error", e as Error);
+    }
   }
 
   /**
@@ -432,7 +442,10 @@ export class Manager<
    * @private
    */
   private ondecoded(packet): void {
-    this.emitReserved("packet", packet);
+    // the nextTick call prevents an exception in a user-provided event listener from triggering a disconnection due to a "parse error"
+    //nextTick(() => {
+      this.emitReserved("packet", packet);
+    //}, this.setTimeoutFn);
   }
 
   /**
@@ -456,6 +469,10 @@ export class Manager<
     if (!socket) {
       socket = new Socket(this, nsp, opts);
       this.nsps[nsp] = socket;
+    }
+
+    if (this._autoConnect) {
+      socket.connect();
     }
 
     return socket;
@@ -538,13 +555,13 @@ export class Manager<
    *
    * @private
    */
-  private onclose(reason: string): void {
+  private onclose(reason: string, description?: DisconnectDescription): void {
     debug("closed due to %s", reason);
 
     this.cleanup();
     this.backoff.reset();
     this._readyState = "closed";
-    this.emitReserved("close", reason);
+    this.emitReserved("close", reason, description);
 
     if (this._reconnection && !this.skipReconnect) {
       this.reconnect();
