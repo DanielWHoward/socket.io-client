@@ -33,10 +33,11 @@
   "types": "./build/esm/index.d.ts",
   "dependencies": {
     "@socket.io/component-emitter": "~3.0.0",
+    "@types/estree": "0.0.47",
     "backo2": "~1.0.2",
     "component-bind": "1.0.0",
     "debug": "~4.3.2",
-    "engine.io-client": "DanielWHoward/engine.io-client#v3-v4-plus",
+    "engine.io-client": "github:DanielWHoward/engine.io-client#v3-v4-plus",
     "has-binary2": "~1.0.2",
     "indexof": "0.0.1",
     "parseqs": "0.0.5",
